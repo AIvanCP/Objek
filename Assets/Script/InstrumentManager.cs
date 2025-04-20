@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections;
 
 public class InstrumentManager : MonoBehaviour
 {
@@ -11,7 +12,9 @@ public class InstrumentManager : MonoBehaviour
     public GameObject bigImagePanel;
     public Image bigInstrumentImage;
     public CanvasGroup uiCanvas;
-    
+    public GameObject informationPanelRoot;
+    public Animator mapAnimator;
+
     public Sprite[] instrumentSprites;
     public string[] instrumentNames;
     public string[] instrumentDescriptions;
@@ -29,8 +32,8 @@ public class InstrumentManager : MonoBehaviour
 
     void Start()
     {
-        if (InfoPanel != null) InfoPanel.SetActive(false);
-        if (bigImagePanel != null) bigImagePanel.SetActive(false);
+        // if (InfoPanel != null) InfoPanel.SetActive(false);
+        // if (bigImagePanel != null) bigImagePanel.SetActive(false);
 
         if (uiCanvas != null)
         {
@@ -60,27 +63,32 @@ public class InstrumentManager : MonoBehaviour
         }
 
         UpdateInstrument(false);
-        
+
+        if (informationPanelRoot.activeSelf)
+        {
+            informationPanelRoot.SetActive(false);
+        }
+
         // Subscribe ke event pause dari GlobalAudioManager
         GlobalAudioManager.OnGamePauseStateChanged += HandlePauseStateChanged;
     }
-    
+
     void OnDestroy()
     {
         // Unsubscribe untuk mencegah memory leak
         GlobalAudioManager.OnGamePauseStateChanged -= HandlePauseStateChanged;
     }
-    
+
     void HandlePauseStateChanged(bool paused)
     {
         isPaused = paused;
-        
+
         // Handle local audio based on pause state
         if (isPaused)
         {
             // Ubah volume BGM lokal jika ada
             if (bgmSource != null) bgmSource.volume = pausedVolume;
-            
+
             // Pause instrumen yang sedang diplay
             if (instrumentSource != null && instrumentSource.isPlaying)
             {
@@ -91,7 +99,7 @@ public class InstrumentManager : MonoBehaviour
         {
             // Kembalikan volume BGM lokal jika ada
             if (bgmSource != null) bgmSource.volume = normalVolume;
-            
+
             // Stop instrumen
             if (instrumentSource != null)
             {
@@ -140,6 +148,11 @@ public class InstrumentManager : MonoBehaviour
             return;
         }
 
+        if (mapAnimator != null)
+        {
+            mapAnimator.Play("zoom-out");
+        }
+
         alatMusikNames.text = instrumentNames[currentIndex];
         descriptionText.text = instrumentDescriptions[currentIndex];
 
@@ -162,16 +175,23 @@ public class InstrumentManager : MonoBehaviour
         currentIndex = index;
         UpdateInstrument(true);
 
-        InfoPanel.SetActive(true);
-        instrumentImage.gameObject.SetActive(true);
+        // InfoPanel.SetActive(true);
+        // instrumentImage.gameObject.SetActive(true);
+        informationPanelRoot.SetActive(true);
     }
 
     public void HideAllPanels()
     {
         if (isPaused) return;
 
-        InfoPanel.SetActive(false);
-        bigImagePanel.SetActive(false);
+        // InfoPanel.SetActive(false);
+        // bigImagePanel.SetActive(false);
+        if (mapAnimator != null)
+        {
+            mapAnimator.Play("zoom");
+            Debug.Log("Zoom in triggered");
+        }
+        informationPanelRoot.SetActive(false);
 
         if (instrumentSource != null && instrumentSource.isPlaying)
         {
@@ -228,7 +248,7 @@ public class InstrumentManager : MonoBehaviour
                 instrumentSource.Stop();
             }
         }
-        
+
         // Notifikasi GlobalAudioManager tentang perubahan pause state
         if (GlobalAudioManager.Instance != null)
         {
@@ -247,7 +267,7 @@ public class InstrumentManager : MonoBehaviour
         {
             instrumentSource.Stop();
         }
-        
+
         // Notifikasi GlobalAudioManager tentang resume
         if (GlobalAudioManager.Instance != null)
         {
