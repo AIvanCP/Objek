@@ -953,7 +953,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bgmSource: {fileID: 1713659716}
-  normalVolume: 0.4
+  normalVolume: 0.1
   pausedVolume: 0.2
 --- !u!82 &1713659716
 AudioSource:
@@ -1362,7 +1362,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.87012345}
   m_AnchorMax: {x: 0.5, y: 0.87012345}
-  m_AnchoredPosition: {x: 12.137299, y: -5.747101}
+  m_AnchoredPosition: {x: 12.137299, y: -5.7470703}
   m_SizeDelta: {x: 349.0029, y: 55.4942}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1822739068
