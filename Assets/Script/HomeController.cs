@@ -7,26 +7,47 @@ public class HomeControllerFix : MonoBehaviour
     public Button playButton;
     public Button exitButton;
 
+    public AudioSource buttonAudioSource; // hanya AudioSource saja
+
     void Start()
     {
-        // Pastikan button tidak null
         if (playButton != null)
         {
-            playButton.onClick.AddListener(PlayGame);
+            playButton.onClick.AddListener(OnPlayButtonClicked);
         }
-        
+
         if (exitButton != null)
         {
-            exitButton.onClick.AddListener(ExitGame);
+            exitButton.onClick.AddListener(OnExitButtonClicked);
         }
     }
 
-    public void PlayGame()
+    void OnPlayButtonClicked()
+    {
+        PlayClickSound();
+        Invoke("LoadMainScene", 0.3f); // Delay 0.3 detik
+    }
+
+    void OnExitButtonClicked()
+    {
+        PlayClickSound();
+        Invoke("LoadExitScene", 0.3f); // Delay 0.3 detik
+    }
+
+    void PlayClickSound()
+    {
+        if (buttonAudioSource != null)
+        {
+            buttonAudioSource.Play();
+        }
+    }
+
+    void LoadMainScene()
     {
         SceneManager.LoadScene("Main");
     }
 
-    public void ExitGame()
+    void LoadExitScene()
     {
         SceneManager.LoadScene("Exit");
     }

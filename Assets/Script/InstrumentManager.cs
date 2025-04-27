@@ -1,10 +1,11 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections;
 
 public class InstrumentManager : MonoBehaviour
 {
+    [Header("UI References")]
     public TextMeshProUGUI alatMusikNames;
     public TextMeshProUGUI descriptionText;
     public Image instrumentImage;
@@ -15,30 +16,26 @@ public class InstrumentManager : MonoBehaviour
     public GameObject informationPanelRoot;
     public Animator mapAnimator;
 
+    [Header("Assets")]
     public Sprite[] instrumentSprites;
     public string[] instrumentNames;
     public string[] instrumentDescriptions;
     public AudioClip[] instrumentSounds;
     public Button[] instrumentButtons;
 
-    private int currentIndex = 0;
-    private bool isPaused = false;
-
-    // Simpan referensi lokal untuk bgmSource
+    [Header("Audio")]
     public AudioSource bgmSource;
     public AudioSource instrumentSource;
     public float normalVolume = 0.4f;
     public float pausedVolume = 0.2f;
 
+    private int currentIndex = 0;
+    private bool isPaused = false;
+
     void Start()
     {
-        // if (InfoPanel != null) InfoPanel.SetActive(false);
-        // if (bigImagePanel != null) bigImagePanel.SetActive(false);
-
         if (uiCanvas != null)
-        {
             uiCanvas.blocksRaycasts = true;
-        }
 
         if (instrumentSource == null)
         {
@@ -46,36 +43,30 @@ public class InstrumentManager : MonoBehaviour
             instrumentSource.playOnAwake = false;
         }
 
-        if (instrumentButtons == null || instrumentButtons.Length == 0)
+        // Setup tombol alat musik
+        if (instrumentButtons != null)
         {
-            return;
-        }
-
-        for (int i = 0; i < instrumentButtons.Length; i++)
-        {
-            if (instrumentButtons[i] == null)
+            for (int i = 0; i < instrumentButtons.Length; i++)
             {
-                continue;
+                if (instrumentButtons[i] != null)
+                {
+                    int index = i;
+                    instrumentButtons[i].onClick.AddListener(() => ShowInstrumentInfo(index));
+                }
             }
-
-            int index = i;
-            instrumentButtons[i].onClick.AddListener(() => ShowInstrumentInfo(index));
         }
 
         UpdateInstrument(false);
 
-        if (informationPanelRoot.activeSelf)
-        {
+        if (informationPanelRoot != null && informationPanelRoot.activeSelf)
             informationPanelRoot.SetActive(false);
-        }
 
-        // Subscribe ke event pause dari GlobalAudioManager
+        // Subscribe ke GlobalAudioManager event
         GlobalAudioManager.OnGamePauseStateChanged += HandlePauseStateChanged;
     }
 
     void OnDestroy()
     {
-        // Unsubscribe untuk mencegah memory leak
         GlobalAudioManager.OnGamePauseStateChanged -= HandlePauseStateChanged;
     }
 
@@ -83,43 +74,23 @@ public class InstrumentManager : MonoBehaviour
     {
         isPaused = paused;
 
-        // Handle local audio based on pause state
         if (isPaused)
         {
-            // Ubah volume BGM lokal jika ada
             if (bgmSource != null) bgmSource.volume = pausedVolume;
-
-            // Pause instrumen yang sedang diplay
             if (instrumentSource != null && instrumentSource.isPlaying)
-            {
                 instrumentSource.Pause();
-            }
         }
         else
         {
-            // Kembalikan volume BGM lokal jika ada
             if (bgmSource != null) bgmSource.volume = normalVolume;
-
-            // Stop instrumen
             if (instrumentSource != null)
-            {
                 instrumentSource.Stop();
-            }
         }
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.P))
-        {
-            TogglePause();
-        }
-
-        if (Input.GetKeyDown(KeyCode.Return))
-        {
-            ResumeGame();
-        }
-
+        // Jangan accept input kalau paused
         if (isPaused) return;
 
         if (Input.GetKeyDown(KeyCode.RightArrow))
@@ -131,7 +102,7 @@ public class InstrumentManager : MonoBehaviour
             PreviousInstrument();
         }
 
-        if (Input.GetMouseButtonDown(0) && InfoPanel.activeSelf)
+        if (Input.GetMouseButtonDown(0) && InfoPanel != null && InfoPanel.activeSelf)
         {
             if (!RectTransformUtility.RectangleContainsScreenPoint(
                 InfoPanel.GetComponent<RectTransform>(), Input.mousePosition, null))
@@ -144,70 +115,63 @@ public class InstrumentManager : MonoBehaviour
     void UpdateInstrument(bool playSound)
     {
         if (currentIndex < 0 || currentIndex >= instrumentNames.Length)
-        {
             return;
-        }
 
         if (mapAnimator != null)
-        {
             mapAnimator.Play("zoom-out");
-        }
 
-        alatMusikNames.text = instrumentNames[currentIndex];
-        descriptionText.text = instrumentDescriptions[currentIndex];
+        if (alatMusikNames != null)
+            alatMusikNames.text = instrumentNames[currentIndex];
 
-        if (instrumentSprites[currentIndex] != null)
+        if (descriptionText != null)
+            descriptionText.text = instrumentDescriptions[currentIndex];
+
+        if (instrumentImage != null && instrumentSprites[currentIndex] != null)
         {
             instrumentImage.sprite = instrumentSprites[currentIndex];
             instrumentImage.enabled = true;
         }
 
-        if (playSound) PlayInstrumentSound(currentIndex);
+        if (playSound)
+            PlayInstrumentSound(currentIndex);
     }
 
     public void ShowInstrumentInfo(int index)
     {
         if (index < 0 || index >= instrumentNames.Length)
-        {
             return;
-        }
 
         currentIndex = index;
         UpdateInstrument(true);
 
-        // InfoPanel.SetActive(true);
-        // instrumentImage.gameObject.SetActive(true);
-        informationPanelRoot.SetActive(true);
+        if (informationPanelRoot != null)
+            informationPanelRoot.SetActive(true);
     }
 
     public void HideAllPanels()
     {
         if (isPaused) return;
 
-        // InfoPanel.SetActive(false);
-        // bigImagePanel.SetActive(false);
         if (mapAnimator != null)
-        {
             mapAnimator.Play("zoom");
-            Debug.Log("Zoom in triggered");
-        }
-        informationPanelRoot.SetActive(false);
+
+        if (informationPanelRoot != null)
+            informationPanelRoot.SetActive(false);
 
         if (instrumentSource != null && instrumentSource.isPlaying)
-        {
             instrumentSource.Stop();
-        }
     }
 
     public void ShowBigImage()
     {
         if (currentIndex < 0 || currentIndex >= instrumentSprites.Length)
-        {
             return;
-        }
 
-        bigInstrumentImage.sprite = instrumentSprites[currentIndex];
-        bigImagePanel.SetActive(true);
+        if (bigInstrumentImage != null && bigImagePanel != null)
+        {
+            bigInstrumentImage.sprite = instrumentSprites[currentIndex];
+            bigImagePanel.SetActive(true);
+        }
     }
 
     public void NextInstrument()
@@ -215,7 +179,7 @@ public class InstrumentManager : MonoBehaviour
         if (isPaused) return;
 
         currentIndex = (currentIndex + 1) % instrumentNames.Length;
-        UpdateInstrument(true); // Diubah menjadi true untuk langsung play suara saat ganti alat musik
+        UpdateInstrument(true);
     }
 
     public void PreviousInstrument()
@@ -223,69 +187,13 @@ public class InstrumentManager : MonoBehaviour
         if (isPaused) return;
 
         currentIndex = (currentIndex - 1 + instrumentNames.Length) % instrumentNames.Length;
-        UpdateInstrument(true); // Diubah menjadi true untuk langsung play suara saat ganti alat musik
-    }
-
-    public void TogglePause()
-    {
-        isPaused = !isPaused;
-
-        if (isPaused)
-        {
-            if (bgmSource != null) bgmSource.volume = pausedVolume;
-
-            if (instrumentSource != null && instrumentSource.isPlaying)
-            {
-                instrumentSource.Pause();
-            }
-        }
-        else
-        {
-            if (bgmSource != null) bgmSource.volume = normalVolume;
-
-            if (instrumentSource != null)
-            {
-                instrumentSource.Stop();
-            }
-        }
-
-        // Notifikasi GlobalAudioManager tentang perubahan pause state
-        if (GlobalAudioManager.Instance != null)
-        {
-            GlobalAudioManager.Instance.SetPauseState(isPaused);
-        }
-    }
-
-    public void ResumeGame()
-    {
-        if (!isPaused) return;
-
-        isPaused = false;
-        if (bgmSource != null) bgmSource.volume = normalVolume;
-
-        if (instrumentSource != null)
-        {
-            instrumentSource.Stop();
-        }
-
-        // Notifikasi GlobalAudioManager tentang resume
-        if (GlobalAudioManager.Instance != null)
-        {
-            GlobalAudioManager.Instance.SetPauseState(false);
-        }
+        UpdateInstrument(true);
     }
 
     void PlayInstrumentSound(int index)
     {
-        if (instrumentSource == null)
-        {
+        if (instrumentSource == null || index < 0 || index >= instrumentSounds.Length || instrumentSounds[index] == null)
             return;
-        }
-
-        if (index < 0 || index >= instrumentSounds.Length || instrumentSounds[index] == null)
-        {
-            return;
-        }
 
         instrumentSource.Stop();
         instrumentSource.clip = instrumentSounds[index];
