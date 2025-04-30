@@ -6,32 +6,39 @@ public class HomeControllerFix : MonoBehaviour
 {
     public Button playButton;
     public Button exitButton;
+    public AudioSource buttonAudioSource;
 
-    public AudioSource buttonAudioSource; // hanya AudioSource saja
+    [Header("Button Colors")]
+    public Color normalColor = Color.white;
+    public Color highlightedColor = Color.yellow;
+    public Color pressedColor = Color.gray;
+    public Color disabledColor = Color.black;
 
     void Start()
     {
         if (playButton != null)
         {
             playButton.onClick.AddListener(OnPlayButtonClicked);
+            SetButtonColors(playButton);
         }
 
         if (exitButton != null)
         {
             exitButton.onClick.AddListener(OnExitButtonClicked);
+            SetButtonColors(exitButton);
         }
     }
 
     void OnPlayButtonClicked()
     {
         PlayClickSound();
-        Invoke("LoadMainScene", 0.3f); // Delay 0.3 detik
+        Invoke("LoadMainScene", 0.3f);
     }
 
     void OnExitButtonClicked()
     {
         PlayClickSound();
-        Invoke("LoadExitScene", 0.3f); // Delay 0.3 detik
+        Invoke("LoadExitScene", 0.3f);
     }
 
     void PlayClickSound()
@@ -50,5 +57,15 @@ public class HomeControllerFix : MonoBehaviour
     void LoadExitScene()
     {
         SceneManager.LoadScene("Exit");
+    }
+
+    void SetButtonColors(Button button)
+    {
+        ColorBlock colors = button.colors;
+        colors.normalColor = normalColor;
+        colors.highlightedColor = highlightedColor;
+        colors.pressedColor = pressedColor;
+        colors.disabledColor = disabledColor;
+        button.colors = colors;
     }
 }

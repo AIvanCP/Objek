@@ -1,14 +1,13 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-using System.Collections; // << Tambahkan ini
+using System.Collections; // << Tetap diperlukan untuk coroutine
 
 public class GameManager : MonoBehaviour
 {
     [Header("Buttons")]
     public Button continueButton;
-    public Button menuButton;
-    public Button exitButton;
+    public Button exitButton; 
 
     [Header("UI Elements")]
     public GameObject pauseMenu;
@@ -27,9 +26,6 @@ public class GameManager : MonoBehaviour
 
         if (continueButton != null)
             continueButton.onClick.AddListener(OnContinueButtonClicked);
-
-        if (menuButton != null)
-            menuButton.onClick.AddListener(OnMenuButtonClicked);
 
         if (exitButton != null)
             exitButton.onClick.AddListener(OnExitButtonClicked);
@@ -81,12 +77,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void GoToMenu()
-    {
-        Time.timeScale = 1f;
-        SceneManager.LoadScene("Home");
-    }
-
     public void ExitToExitScene()
     {
         Time.timeScale = 1f;
@@ -106,23 +96,10 @@ public class GameManager : MonoBehaviour
         PlayClickSound();
     }
 
-    void OnMenuButtonClicked()
-    {
-        PlayClickSound();
-        StartCoroutine(GoToMenuDelayed());
-    }
-
     void OnExitButtonClicked()
     {
         PlayClickSound();
         StartCoroutine(ExitToExitSceneDelayed());
-    }
-
-    // Coroutine agar delay tetap jalan saat Time.timeScale = 0
-    IEnumerator GoToMenuDelayed()
-    {
-        yield return new WaitForSecondsRealtime(0.3f);
-        GoToMenu();
     }
 
     IEnumerator ExitToExitSceneDelayed()
